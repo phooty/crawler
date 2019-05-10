@@ -1,0 +1,25 @@
+{
+    "name": "phooty/crawler",
+    "description": "Phooty Crawler for afltables.com",
+    "type": "library",
+    "license": "MIT",
+    "config": {
+        "bin-dir": "bin"
+    },
+    "authors": [
+        {
+            "name": "Simon Eddy",
+            "email": "simon@simoneddy.com.au"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Phooty\\Crawler\\": "src"
+        }
+    },
+    "require": {
+        "php": ">=7.1"
+    }
+}
