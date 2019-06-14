@@ -71,6 +71,7 @@ class CrawlSeasonHtml extends Command
         
         $crawler = $this->container->make(SeasonPlayerTotals::class);
         $output->writeln('Crawling html...');
+        //dd('here');
         $result = $crawler->crawl($html);
         $players = $result->players()->all();
         $this->em = $this->container->make(EntityManager::class);

@@ -11,7 +11,7 @@ use Phooty\Crawler\Support\MappingUtils;
 use Phooty\Crawler\Results;
 use Phooty\Crawler\Processor\Node\TeamFromTableHeading;
 use Phooty\Crawler\Processor\Node\GetPriorPlayers;
-use Phooty\Crawler\Support\OrmUtil;
+use Phooty\Support\OrmUtil;
 use Phooty\Orm\Entities\Team;
 use Phooty\Orm\Entities\Player;
 use Phooty\Orm\Entities\RosterPlayer;
@@ -81,8 +81,8 @@ class SeasonPlayerTotals extends BaseCrawler
 
             } elseif(TeamFromTableHeading::isValid($node)) {
                 
-                $team = $this->resolveTeam(
-                    $this->processor(
+                $team = $this->getTeam(
+                    (array) $this->processor(
                         TeamFromTableHeading::class
                     )->process($node)
                 );
@@ -97,6 +97,7 @@ class SeasonPlayerTotals extends BaseCrawler
     {
         foreach ($nodes as $child) {
             $data = MappingUtils::mapNode($child, $this->mappings);
+            //dd($data);
             if (!isset($data['player'])) {
                 break;
             }
@@ -107,39 +108,46 @@ class SeasonPlayerTotals extends BaseCrawler
             $player['prior_players'] = $this->processor(
                 GetPriorPlayers::class
             )->process($child);
-            $model = $this->resolvePlayer($player);
+            $model = $this->getPlayer($player);
             
             $this->result()->players()->add($model);
-            $this->result()->rosters()->add($this->resolveRosterPlayer($model));
+            
+            $this->result()->rosters()->add($this->getRosterPlayer([
+                'player' => $model,
+                'team' => $this->team,
+                'season' => $this->season,
+                'number' => $data['number']
+            ], $data));
+
+            //dd($this->result()->rosters()->last());
         }
     }
 
-    private function resolveTeam(array $data)
+    private function getTeam(array $data)
     {
         return $this->orm->find(Team::class, $data, function (array $data) {
             return $this->factory('team')->build($data);;
         });
     }
 
-    private function resolvePlayer(array $data)
+    private function getPlayer(array $data)
     {
         return $this->orm->find(Player::class, $data, function (array $data) {
             return $this->factory('player')->build($data);
         });
     }
 
-    private function resolveRosterPlayer(Player $player)
+    private function getRosterPlayer(array $data, array $stats)
     {
-        $data = [
-            'player' => $player,
-            'team' => $this->team,
-            'season' => $this->season
-        ];
         return $this->orm->find(
             RosterPlayer::class,
             $data,
-            function (array $data) {
-                return $this->factory('roster.player')->build($data);
+            function (array $data) use ($stats) {
+                $player = $this->factory('roster.player')->build($data);
+                $stats = $this->factory('season.stats')->build($stats);
+                $stats->setRosterPlayer($player);
+                $player->setSeasonStats($stats);
+                return $player;
             }
         );
     }

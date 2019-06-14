@@ -7,7 +7,7 @@ class MappingUtils
 {
     /**
      * Attempts to transform a Node into an array conforming to the given
-     * MappingsInterface.
+     * Mapping.
      *
      * @param \DOMElement $node
      * @return array

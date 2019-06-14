@@ -6,9 +6,9 @@ use Phooty\Crawler\Factory\DataFactory;
 
 class FactoryServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function boot()
     {
-        $factories = $this->app->make('config')->get('phooty.crawler.factories');
+        $factories = $this->app->make('config')->get('crawler.factories');
 
         $factories = array_filter($factories, function ($val, $key) {
             return is_string($key)

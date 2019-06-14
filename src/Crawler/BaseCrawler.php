@@ -52,6 +52,9 @@ abstract class BaseCrawler implements Crawler
      */
     public function factory(string $factory = null)
     {
+        /* if ($this->container->has("factory.{$factory}")) {
+            dd($factory);
+        } */
         return $this->container->make("factory.{$factory}");
     }
 
